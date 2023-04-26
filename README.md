@@ -1,2 +1,2 @@
 # Absence-Management-System
-Absence Management API using SpringBoot, MySQL &amp; Firebase
+Absence Management API using SpringBoot, PostgreSQL &amp; Firebase
