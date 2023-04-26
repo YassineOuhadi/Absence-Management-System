@@ -1,7 +1,7 @@
 package com.inn.AttendanceAPI.dao;
 
 import com.inn.AttendanceAPI.model.User;
-import com.inn.AttendanceApi.wrapper.UserWrapper;
+import com.inn.AttendanceAPI.wrapper.UserWrapper;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.repository.query.Param;

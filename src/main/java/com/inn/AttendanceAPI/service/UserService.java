@@ -1,6 +1,6 @@
 package com.inn.AttendanceAPI.service;
 
-import com.inn.AttendanceApi.wrapper.UserWrapper;
+import com.inn.AttendanceAPI.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
