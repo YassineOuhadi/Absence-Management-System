@@ -1,2 +1,2 @@
 # Attendance-API
-Spring Boot, PostgreSQL, Firebase, Spring Security, JWT, JPA, Rest API
+Spring Boot, PostgreSQL, Spring Security, JWT, JPA, Rest API
