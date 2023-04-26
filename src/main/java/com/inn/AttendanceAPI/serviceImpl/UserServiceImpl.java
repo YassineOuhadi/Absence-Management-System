@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private boolean validateSignupMap(Map<String,String> requestMap){
-        if(requestMap.containsKey("name") && requestMap.containsKey("contactNumber") && requestMap.containsKey("email") && requestMap.containsKey("password")){
+        if(requestMap.containsKey("firstName") && requestMap.containsKey("lastName") && requestMap.containsKey("contactNumber") && requestMap.containsKey("email") && requestMap.containsKey("password")){
             return true;
         }
         return false;
@@ -178,7 +178,7 @@ public class UserServiceImpl implements UserService {
         try {
             User user = userDao.findByEmail(requestMap.get("email"));
             if(!Objects.isNull(user) && !Strings.isNullOrEmpty(user.getEmail()))
-                emailUtils.forgotMail(user.getEmail(),"Credentials by Cafe Management System",user.getPassword());
+                emailUtils.forgotMail(user.getEmail(),"Credentials by Attendance Management System",user.getPassword());
             return SystemUtils.getResponseEntity("Check your mail for Credentials.",HttpStatus.OK);
         }catch (Exception e){
             e.printStackTrace();
