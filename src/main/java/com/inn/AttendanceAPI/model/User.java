@@ -9,7 +9,7 @@ import java.io.Serializable;
 
 @NamedQuery(name = "User.findByEmailId", query = "SELECT u FROM User u WHERE u.email = :email")
 
-@NamedQuery(name = "User.getAllUsers", query = "SELECT new com.inn.AttendanceApi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'user'")
+@NamedQuery(name = "User.getAllUsers", query = "SELECT new com.inn.AttendanceAPI.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'user'")
 
 @NamedQuery(name = "User.getAllAdmin", query = "SELECT u.email from User u WHERE u.role = 'admin'")
 

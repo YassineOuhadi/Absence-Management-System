@@ -10,7 +10,7 @@ import com.inn.AttendanceAPI.model.User;
 import com.inn.AttendanceAPI.service.UserService;
 import com.inn.AttendanceAPI.utils.EmailUtils;
 import com.inn.AttendanceAPI.utils.SystemUtils;
-import com.inn.AttendanceApi.wrapper.UserWrapper;
+import com.inn.AttendanceAPI.wrapper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

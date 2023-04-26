@@ -4,7 +4,7 @@ import com.inn.AttendanceAPI.constants.SystemCst;
 import com.inn.AttendanceAPI.controller.UserCtrl;
 import com.inn.AttendanceAPI.service.UserService;
 import com.inn.AttendanceAPI.utils.SystemUtils;
-import com.inn.AttendanceApi.wrapper.UserWrapper;
+import com.inn.AttendanceAPI.wrapper.UserWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

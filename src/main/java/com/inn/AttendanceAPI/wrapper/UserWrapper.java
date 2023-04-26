@@ -1,4 +1,4 @@
-package com.inn.AttendanceApi.wrapper;
+package com.inn.AttendanceAPI.wrapper;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

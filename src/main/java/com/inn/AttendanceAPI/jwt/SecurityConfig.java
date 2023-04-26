@@ -48,7 +48,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/user/login","/user/signup","/user/forgotPassword","/scan/getAllScans")//routes not nessecite auth
+                .antMatchers("/user/login","/user/signup","/user/forgotPassword")//routes not nessecite auth
                 .permitAll()
                 .anyRequest()
                 .authenticated()
