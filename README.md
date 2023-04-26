@@ -1,4 +1,4 @@
-# Attendance-API
+# Attendance API
 Spring Boot, PostgreSQL, Spring Security, JWT, JPA, Rest API
 
 Workspace Postman Invite Link
