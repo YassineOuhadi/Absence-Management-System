@@ -8,8 +8,8 @@
 		<version>2.6.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>com.inn.AttendanceApi</groupId>
-	<artifactId>com.inn.AttendanceApi</artifactId>
+	<groupId>com.inn.attendanceapi</groupId>
+	<artifactId>com.inn.attendanceapi</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Attendance API</name>
 	<description>JEE Project</description>
