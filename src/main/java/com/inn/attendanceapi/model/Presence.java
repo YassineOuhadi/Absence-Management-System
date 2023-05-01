@@ -5,9 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import javax.annotation.Nullable;
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.sql.Time;
 
@@ -24,9 +22,6 @@ public class Presence implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-
-    @Column(name = "is_presence", columnDefinition = "boolean default false")
-    private boolean isPresence;
 
     @Column(name = "entry_time", columnDefinition = "TIME DEFAULT '00:00:00'")
     @JsonFormat(pattern = "HH:mm:ss")

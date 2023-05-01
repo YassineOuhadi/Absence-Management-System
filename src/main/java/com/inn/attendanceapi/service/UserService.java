@@ -8,13 +8,7 @@ import java.util.Map;
 
 public interface UserService {
 
-    ResponseEntity<String> signup(Map<String,String> requestMap);
-
     ResponseEntity<String> login(Map<String,String> requestMap);
-
-    ResponseEntity<List<UserWrapper>> getAllStudents();
-
-    ResponseEntity<List<UserWrapper>> getAllProfessors();
 
     ResponseEntity<String> update(Map<String,String> requestMap);
 

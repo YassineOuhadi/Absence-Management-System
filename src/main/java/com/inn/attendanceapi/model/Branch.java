@@ -1,6 +1,5 @@
 package com.inn.attendanceapi.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -27,13 +26,9 @@ public class Branch implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @JsonIgnoreProperties("branches")
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinTable(name = "branchModules",
-            joinColumns = @JoinColumn(name = "branch_id"),
-            inverseJoinColumns = @JoinColumn(name = "module_id"))
-    private Set<Module> modules = new HashSet<>();
+    @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL)
+    private Set<YearBranchStudents> yearBranchStudents = new HashSet<>();
 
     @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL)
-    private Set<study> studies = new HashSet<>();
+    private Set<SemesterBranchModules> semesterBranchModules = new HashSet<>();
 }

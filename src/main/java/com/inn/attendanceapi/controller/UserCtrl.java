@@ -11,13 +11,10 @@ import java.util.Map;
 @RequestMapping(path = "/user")
 public interface UserCtrl {
 
-    @PostMapping(path = "/add")
-    public ResponseEntity<String> signUp(@RequestBody(required = true) Map<String,String> requestMap);
-
     @PostMapping(path = "/login")
     public ResponseEntity<String> login(@RequestBody(required = true) Map<String,String> requestMap);
 
-    @PostMapping(path = "/update")
+    @PostMapping(path = "/updateStatus")
     public ResponseEntity<String> update(@RequestBody(required = true) Map<String,String> requestMap);
 
     @GetMapping(path = "/checkToken")

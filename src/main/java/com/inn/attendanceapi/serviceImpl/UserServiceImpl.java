@@ -44,50 +44,7 @@ public class UserServiceImpl implements UserService {
     @Autowired
     EmailUtils emailUtils;
 
-    @Override
-    public ResponseEntity<String> signup(Map<String, String> requestMap) {
-        log.info("Inside signup {}",requestMap);
-        try {
-            if(jwtFilter.isAdmin()){
-            if (validateSignupMap(requestMap)) {
-                User user = userDao.findByEmailId(requestMap.get("email")); //objet persistent, when i do save he modifier en base de donne, to rendre objet simple on va detacher
-                if (Objects.isNull(user)) {
-                    userDao.save(getUserFromMap(requestMap));
-                    return SystemUtils.getResponseEntity("Successfully Registered", HttpStatus.OK);
-                } else {
-                    return SystemUtils.getResponseEntity("Email already exits", HttpStatus.BAD_REQUEST);
-                }
-            } else {
-                return SystemUtils.getResponseEntity(SystemCst.INVALID_DATA, HttpStatus.BAD_REQUEST);
-            }
-            }else{
-                return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
-            }
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
-        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
-    private boolean validateSignupMap(Map<String,String> requestMap){
-        if(requestMap.containsKey("firstName") && requestMap.containsKey("lastName") && requestMap.containsKey("contactNumber") && requestMap.containsKey("email") && requestMap.containsKey("password") && requestMap.containsKey("role") && EnumSet.allOf(User.UserRole.class).stream().map(Enum::name).anyMatch(requestMap.get("role")::equalsIgnoreCase)){
-            return true;
-        }
-        return false;
-    }
-
-    private User getUserFromMap(Map<String,String> requestMap){
-        User user = new User();
-        user.setFirstName(requestMap.get("firstName"));
-        user.setLastName(requestMap.get("lastName"));
-        user.setContactNumber(requestMap.get("contactNumber"));
-        user.setEmail(requestMap.get("email"));
-        user.setPassword(requestMap.get("password"));
-        user.setStatus("DEACTIVATED");
-        user.setRole(User.UserRole.valueOf(requestMap.get("role")));
-        return user;
-    }
 
 
     @Override
@@ -114,34 +71,6 @@ public class UserServiceImpl implements UserService {
         }
         return new ResponseEntity<String>("{\"message\":\""+"Bad Credentials."+"\"}",
                 HttpStatus.BAD_REQUEST);
-    }
-
-    @Override
-    public ResponseEntity<List<UserWrapper>> getAllStudents() {
-        try{
-            if(jwtFilter.isAdmin()){
-                return new ResponseEntity<>(userDao.getAllStudents(),HttpStatus.OK);
-            }else{
-                return new ResponseEntity<>(new ArrayList<>(),HttpStatus.UNAUTHORIZED);
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @Override
-    public ResponseEntity<List<UserWrapper>> getAllProfessors(){
-        try{
-            if(jwtFilter.isAdmin()){
-                return new ResponseEntity<>(userDao.getAllProfessors(),HttpStatus.OK);
-            }else{
-                return new ResponseEntity<>(new ArrayList<>(),HttpStatus.UNAUTHORIZED);
-            }
-        }catch(Exception e){
-            e.printStackTrace();
-        }
-        return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @Override

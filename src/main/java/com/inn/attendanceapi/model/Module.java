@@ -1,6 +1,7 @@
 package com.inn.attendanceapi.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
@@ -10,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Data
+@NoArgsConstructor
 @Entity
 @DynamicUpdate
 @DynamicInsert
@@ -26,7 +28,11 @@ public class Module implements Serializable {
     @Column(name = "name")
     private String name;
 
-    @ManyToMany(fetch = FetchType.LAZY, mappedBy = "modules")
-    private Set<Branch> branches = new HashSet<>();
+    @OneToMany(mappedBy = "module", cascade = CascadeType.ALL)
+    private Set<SemesterBranchModules> semesterBranchModules = new HashSet<>();
 
+    public Module(Module module) {
+        this.id = module.getId();
+        this.name = module.getName();
+    }
 }

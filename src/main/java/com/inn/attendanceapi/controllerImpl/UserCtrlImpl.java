@@ -18,16 +18,6 @@ public class UserCtrlImpl implements UserCtrl {
     UserService userService;
 
     @Override
-    public ResponseEntity<String> signUp(Map<String, String> requestMap) {
-        try{
-            return userService.signup(requestMap);
-        }catch (Exception e){
-            e.printStackTrace();
-        }
-        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
-    @Override
     public ResponseEntity<String> login(Map<String, String> requestMap) {
         try{
             return userService.login(requestMap);

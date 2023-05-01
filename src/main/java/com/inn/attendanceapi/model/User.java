@@ -11,13 +11,15 @@ import java.util.Set;
 
 @NamedQuery(name = "User.findByEmailId", query = "SELECT u FROM User u WHERE u.email = :email")
 
-@NamedQuery(name = "User.getAllStudents", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'STUDENT'")
+@NamedQuery(name = "User.getAllStudents", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'STUDENT'")
 
-@NamedQuery(name = "User.getAllProfessors", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'PROFESSOR'")
+@NamedQuery(name = "User.getAllProfessors", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'PROFESSOR'")
 
 @NamedQuery(name = "User.getAllAdmin", query = "SELECT u.email from User u WHERE u.role = 'ADMIN'")
 
 @NamedQuery(name = "User.updateStatus", query = "UPDATE User u set u.status= :status WHERE u.id = :id")
+
+@NamedQuery(name = "User.findByGroupId", query = "SELECT u FROM User u JOIN u.groups g WHERE g.id = :groupId")
 
 @Data
 @Entity
@@ -29,7 +31,7 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public enum UserRole {
-        ADMIN, STUDENT, PROFESSOR
+        STUDENT, PROFESSOR, ADMIN
     }
 
     @Id
@@ -42,6 +44,9 @@ public class User implements Serializable {
 
     @Column(name = "last_name")
     private String lastName;
+
+    @Column(name = "rfid", nullable = true)
+    private String rfid;
 
     @Column(name = "email")
     private String email;
@@ -60,7 +65,7 @@ public class User implements Serializable {
     private User.UserRole role;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
-    private Set<study> studies = new HashSet<>();
+    private Set<YearBranchStudents> yearBranchStudents = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY, mappedBy = "students")
     private Set<Group> groups = new HashSet<>();

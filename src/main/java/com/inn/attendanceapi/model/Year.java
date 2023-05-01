@@ -23,9 +23,16 @@ public class Year implements Serializable {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "year")
-    private Integer year;
+    @Column(name = "start_year")
+    private Integer startYear;
+
+    @Column(name = "end_year")
+    private Integer endYear;
 
     @OneToMany(mappedBy = "year", cascade = CascadeType.ALL)
-    private Set<study> studies = new HashSet<>();
+    private Set<YearBranchStudents> yearBranchStudents = new HashSet<>();
+
+    public String getAcademicYear() {
+        return startYear + "-" + endYear;
+    }
 }

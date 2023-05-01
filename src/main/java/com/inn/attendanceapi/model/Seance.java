@@ -43,6 +43,9 @@ public class Seance implements Serializable {
     @NotNull
     private Time time;
 
+    @Column(name = "salle")
+    private String salle;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private SeanceType type;

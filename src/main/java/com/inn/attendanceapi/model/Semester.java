@@ -7,6 +7,8 @@ import org.hibernate.annotations.DynamicUpdate;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -21,10 +23,7 @@ public class Semester implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
-
-    @Column(name = "semester")
-    private String semester;
-
+    
     @Column(name = "start_date")
     private LocalDate startDate;
 
@@ -34,4 +33,7 @@ public class Semester implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "year_fk", nullable = false)
     private Year year;
+
+    @OneToMany(mappedBy = "semester", cascade = CascadeType.ALL)
+    private Set<SemesterBranchModules> semesterBranchModules = new HashSet<>();
 }
