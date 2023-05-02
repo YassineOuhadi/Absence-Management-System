@@ -11,9 +11,9 @@ import java.util.Set;
 
 @NamedQuery(name = "User.findByEmailId", query = "SELECT u FROM User u WHERE u.email = :email")
 
-@NamedQuery(name = "User.getAllStudents", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'STUDENT'")
+@NamedQuery(name = "User.getAllStudents", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status,u.role) from User u WHERE u.role = 'STUDENT'")
 
-@NamedQuery(name = "User.getAllProfessors", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status) from User u WHERE u.role = 'PROFESSOR'")
+@NamedQuery(name = "User.getAllProfessors", query = "SELECT new com.inn.attendanceapi.wrapper.UserWrapper(u.id,u.firstName,u.lastName,u.rfid,u.email,u.contactNumber,u.status,u.role) from User u WHERE u.role = 'PROFESSOR'")
 
 @NamedQuery(name = "User.getAllAdmin", query = "SELECT u.email from User u WHERE u.role = 'ADMIN'")
 

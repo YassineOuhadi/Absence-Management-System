@@ -14,6 +14,16 @@ import java.sql.Time;
 @DynamicUpdate
 @DynamicInsert
 @Table(name = "presence")
+@NamedQueries({
+        @NamedQuery(
+                name = "Presence.findByUserAndSeance",
+                query = "SELECT p FROM Presence p WHERE p.user = :user AND p.seance = :seance"
+        ),
+        @NamedQuery(
+                name = "Presence.findBySeance",
+                query = "SELECT p FROM Presence p WHERE p.seance = :seance"
+        )
+})
 public class Presence implements Serializable {
 
     private static final long serialVersionUID = 1L;
