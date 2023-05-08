@@ -9,9 +9,9 @@ import java.util.Map;
 
 public interface SeanceService {
 
+    ResponseEntity<String> addSeance(Map<String, String> requestMap);
     ResponseEntity<String> addParticipant(Map<String, String> requestMap);
-
-    ResponseEntity<String> addParticipants(Map<String, String> requestMap);
-
     ResponseEntity<List<SeanceParticipantWrapper>> getParticipants(Map<String, String> requestMap);
+
+    ResponseEntity<String> validatePresence(Map<String, String> requestMap);
 }

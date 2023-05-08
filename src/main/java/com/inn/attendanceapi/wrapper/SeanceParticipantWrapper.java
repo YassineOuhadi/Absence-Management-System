@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.sql.Time;
+import java.time.LocalTime;
 
 @Data
 @NoArgsConstructor
@@ -12,9 +13,7 @@ public class SeanceParticipantWrapper {
     private boolean isPresent;
     private Time entryTime;
 
-    public SeanceParticipantWrapper(UserWrapper user, boolean isPresent) {
-        this(user, isPresent, null);
-    }
+
 
     public SeanceParticipantWrapper(UserWrapper user, boolean isPresent, Time entryTime) {
         this.user = user;
@@ -23,8 +22,8 @@ public class SeanceParticipantWrapper {
     }
 
     // getters and setters
-    public void setPresent(boolean isPresent) {
-        this.isPresent = isPresent;
-    }
+
 }
+
+
 

@@ -11,5 +11,5 @@ public interface SeanceParticipantsDao extends JpaRepository<SeanceParticipants,
 
     List<SeanceParticipants> findBySeanceId(@Param("seance_id") Integer seance_id);
 
-    List<SeanceParticipants> findBySeanceIdAndUserRole(@Param("seance_id") Integer seance_id, @Param("userRole") User.UserRole userRole);
+    User findBySeanceIdAndUserRole(@Param("seance_id") Integer seance_id, @Param("role") User.UserRole userRole);
 }

@@ -8,18 +8,22 @@ import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 import java.sql.Time;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import java.time.LocalTime;
 
 @Data
 @Entity
 @DynamicUpdate
 @DynamicInsert
 @Table(name = "seance")
+@NamedQueries({
+        @NamedQuery(
+                name = "Seance.findAllSeancesBySalleAndDate",
+                query = "SELECT s FROM Seance s WHERE s.salle = :salle AND s.date = :date"
+        )
+})
 public class Seance implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -43,8 +47,10 @@ public class Seance implements Serializable {
     @NotNull
     private Time time;
 
-    @Column(name = "salle")
-    private String salle;
+    @Column(name = "duration")
+    @JsonFormat(pattern = "HH:mm:ss")
+    @NotNull
+    private Time duration;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
@@ -57,4 +63,17 @@ public class Seance implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "element_fk", nullable = false)
     private Element element;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "salle_fk", nullable = false)
+    private Salle salle;
+
+    public boolean conflictsWith(LocalTime otherStartTime, LocalTime otherEndTime) {
+        LocalTime seanceStartTime = time.toLocalTime();
+        LocalTime seanceEndTime = seanceStartTime.plusMinutes(duration.getTime() / 60000);
+        return (seanceStartTime.isAfter(otherStartTime) && seanceStartTime.isBefore(otherEndTime))
+                || (seanceEndTime.isAfter(otherStartTime) && seanceEndTime.isBefore(otherEndTime))
+                || (seanceStartTime.isBefore(otherStartTime) && seanceEndTime.isAfter(otherEndTime))
+                || seanceStartTime.equals(otherStartTime) || seanceEndTime.equals(otherEndTime);
+    }
 }

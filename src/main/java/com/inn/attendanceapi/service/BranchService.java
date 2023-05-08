@@ -1,6 +1,7 @@
 package com.inn.attendanceapi.service;
 
 import com.inn.attendanceapi.model.Module;
+import com.inn.attendanceapi.wrapper.ModuleWrapper;
 import com.inn.attendanceapi.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;
 
@@ -15,5 +16,5 @@ public interface BranchService {
 
     ResponseEntity<String> addModule(Map<String, String> requestMap);
 
-    ResponseEntity<List<Module>> getModules(Map<String, String> requestMap);
+    ResponseEntity<List<ModuleWrapper>> getModules(Map<String, String> requestMap);
 }

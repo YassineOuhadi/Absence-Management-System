@@ -10,6 +10,7 @@ import com.inn.attendanceapi.model.*;
 import com.inn.attendanceapi.model.Module;
 import com.inn.attendanceapi.service.BranchService;
 import com.inn.attendanceapi.utils.SystemUtils;
+import com.inn.attendanceapi.wrapper.ModuleWrapper;
 import com.inn.attendanceapi.wrapper.UserWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,18 +142,17 @@ public class BranchServiceImpl implements BranchService {
         return semesterBranchModules;
     }
 
-    public ResponseEntity<List<Module>> getModules(Map<String, String> requestMap) {
+    public ResponseEntity<List<ModuleWrapper>> getModules(Map<String, String> requestMap) {
         try {
             if(jwtFilter.isAdmin()){
                 if(requestMap.containsKey("semester_id") && requestMap.containsKey("branch_id") && requestMap.containsKey("level")){
-                    List<Module> modules = new ArrayList<>();
+                    List<ModuleWrapper> modules = new ArrayList<>();
                     Integer semesterId = Integer.parseInt(requestMap.get("semester_id"));
                     Integer branchId = Integer.parseInt(requestMap.get("branch_id"));
                     YearBranchStudents.Level level = YearBranchStudents.Level.valueOf(requestMap.get("level"));
                     List<SemesterBranchModules> semesterBranchModulesList = semesterBranchModulesDao.findBySemesterIdAndBranchIdAndLevel(semesterId, branchId, level);
                     for (SemesterBranchModules semesterBranchModule : semesterBranchModulesList) {
-
-                        modules.add(new Module(semesterBranchModule.getModule()));
+                        modules.add(new ModuleWrapper(semesterBranchModule.getModule()));
                     }
                     return new ResponseEntity<>(modules, HttpStatus.OK);
                 }

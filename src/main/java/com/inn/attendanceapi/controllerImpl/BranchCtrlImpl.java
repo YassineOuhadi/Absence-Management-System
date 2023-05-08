@@ -7,6 +7,7 @@ import com.inn.attendanceapi.model.Module;
 import com.inn.attendanceapi.model.YearBranchStudents;
 import com.inn.attendanceapi.service.BranchService;
 import com.inn.attendanceapi.utils.SystemUtils;
+import com.inn.attendanceapi.wrapper.ModuleWrapper;
 import com.inn.attendanceapi.wrapper.UserWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class BranchCtrlImpl implements BranchCtrl {
     }
 
     @Override
-    public ResponseEntity<List<Module>> getModules(Map<String, String> requestMap) {
+    public ResponseEntity<List<ModuleWrapper>> getModules(Map<String, String> requestMap) {
         try{
             return branchService.getModules(requestMap);
         }catch (Exception e){

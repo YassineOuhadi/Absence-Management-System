@@ -23,7 +23,7 @@ import java.sql.Time;
         ),
         @NamedQuery(
                 name = "SeanceParticipants.findBySeanceIdAndUserRole",
-                query = "SELECT sp FROM SeanceParticipants sp WHERE sp.seance.id = :seance_id AND sp.user.role = :role"
+                query = "SELECT sp.user FROM SeanceParticipants sp WHERE sp.seance.id = :seance_id AND sp.user.role = :role"
         )
 })
 public class SeanceParticipants implements Serializable {

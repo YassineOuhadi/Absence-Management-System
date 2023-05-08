@@ -22,9 +22,9 @@ public class SeanceCtrlImpl implements SeanceCtrl {
     SeanceService seanceService;
 
     @Override
-    public ResponseEntity<String> addParticipant(Map<String, String> requestMap) {
+    public ResponseEntity<String> addSeance(Map<String, String> requestMap) {
         try {
-            return seanceService.addParticipant(requestMap);
+            return seanceService.addSeance(requestMap);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -32,9 +32,9 @@ public class SeanceCtrlImpl implements SeanceCtrl {
     }
 
     @Override
-    public ResponseEntity<String> addParticipants(Map<String, String> requestMap) {
+    public ResponseEntity<String> addParticipant(Map<String, String> requestMap) {
         try {
-            return seanceService.addParticipants(requestMap);
+            return seanceService.addParticipant(requestMap);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -49,5 +49,15 @@ public class SeanceCtrlImpl implements SeanceCtrl {
             e.printStackTrace();
         }
         return new ResponseEntity<>(new ArrayList<>(),HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> validatePresence(Map<String, String> requestMap) {
+        try {
+            return seanceService.validatePresence(requestMap);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
