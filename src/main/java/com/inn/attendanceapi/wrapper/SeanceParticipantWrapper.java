@@ -11,13 +11,15 @@ import java.time.LocalTime;
 public class SeanceParticipantWrapper {
     private UserWrapper user;
     private boolean isPresent;
+    private boolean isValidate;
     private Time entryTime;
 
 
 
-    public SeanceParticipantWrapper(UserWrapper user, boolean isPresent, Time entryTime) {
+    public SeanceParticipantWrapper(UserWrapper user, boolean isPresent, boolean isValidate, Time entryTime) {
         this.user = user;
         this.isPresent = isPresent;
+        this.isValidate = isValidate;
         this.entryTime = entryTime;
     }
 

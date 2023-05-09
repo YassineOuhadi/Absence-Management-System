@@ -22,6 +22,14 @@ import java.sql.Time;
         @NamedQuery(
                 name = "Presence.findBySeance",
                 query = "SELECT p FROM Presence p WHERE p.seance = :seance"
+        ),
+        @NamedQuery(
+                name = "Presence.findUnvalidatedSeances",
+                query = "SELECT DISTINCT p.seance FROM Presence p WHERE p.isValidate = false"
+        ),
+        @NamedQuery(
+                name = "Presence.existsByValidate",
+                query = "SELECT CASE WHEN COUNT(p) > 0 THEN TRUE ELSE FALSE END FROM Presence p WHERE p.isValidate = :isValidate"
         )
 })
 public class Presence implements Serializable {
@@ -44,4 +52,7 @@ public class Presence implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_fk", nullable = false)
     private User user;
+
+    @Column(name = "is_validate", columnDefinition = "boolean default false")
+    private boolean isValidate;
 }

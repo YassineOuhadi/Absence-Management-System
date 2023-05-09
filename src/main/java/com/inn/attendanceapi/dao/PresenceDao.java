@@ -15,4 +15,7 @@ public interface PresenceDao extends JpaRepository<Presence,Integer> {
 
     List<Presence> findBySeance(@Param("seance") Seance seance);
 
+    List<Seance> findUnvalidatedSeances();
+
+    boolean existsByValidate(@Param("isValidate") boolean isValidate);
 }

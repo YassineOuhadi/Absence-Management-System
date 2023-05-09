@@ -198,6 +198,7 @@ public class SeanceServiceImpl implements SeanceService {
         return seanceParticipants;
     }
 
+
     @Override
     public ResponseEntity<List<SeanceParticipantWrapper>> getParticipants(Map<String, String> requestMap) {
         try {
@@ -228,9 +229,9 @@ public class SeanceServiceImpl implements SeanceService {
                         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.PRECONDITION_FAILED);
                     }
 
-                    if(jwtFilter.isAdmin() && LocalDateTime.now().isBefore(seanceEndDateTime)){
+                    /*if(jwtFilter.isAdmin() && LocalDateTime.now().isBefore(seanceEndDateTime)){
                         return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
-                    }
+                    }*/
 
                     List<SeanceParticipants> seanceParticipantsList = seanceParticipantsDao.findBySeanceId(seanceId);
                     List<SeanceParticipantWrapper> participants = new ArrayList<>();
@@ -242,12 +243,14 @@ public class SeanceServiceImpl implements SeanceService {
                     for (SeanceParticipants seanceParticipant : seanceParticipantsList) {
                         User user = seanceParticipant.getUser();
 
-                        if (jwtFilter.isProfessor() && user.getRole() != User.UserRole.STUDENT) {
+                        /*if (jwtFilter.isProfessor() && user.getRole() != User.UserRole.STUDENT) {
                             continue;
-                        }
+                        }*/
 
-                        boolean isPresent = checkPresence(seanceParticipant).isPresent();
-                        Time entryTime = checkPresence(seanceParticipant).entryTime();
+                        PresenceRecord presenceRecord = checkPresence(seanceParticipant);
+                        boolean isPresent = presenceRecord.isPresent();
+                        boolean isValidate = presenceRecord.isValidate();
+                        Time entryTime = presenceRecord.entryTime();
 
                         if (requestMap.containsKey("status")) {
                             if (requestMap.get("status").equalsIgnoreCase("PRESENT") && !isPresent) {
@@ -258,7 +261,7 @@ public class SeanceServiceImpl implements SeanceService {
                             }
                         }
 
-                        SeanceParticipantWrapper participant = new SeanceParticipantWrapper(new UserWrapper(user), isPresent, entryTime);
+                        SeanceParticipantWrapper participant = new SeanceParticipantWrapper(new UserWrapper(user), isPresent, isValidate, entryTime);
                         participants.add(participant);
                     }
 
@@ -276,33 +279,77 @@ public class SeanceServiceImpl implements SeanceService {
     public PresenceRecord checkPresence(SeanceParticipants seanceParticipant) {
         Presence presence = presenceDao.findByUserAndSeance(seanceParticipant.getUser(), seanceParticipant.getSeance());
         boolean isPresent = false;
+        boolean isValidate = false;
         Time entryTime = null;
         if (presence != null) {
             entryTime = presence.getEntrytime();
-            if (!seanceParticipant.isPresence()) {
-                LocalDate seanceDate = seanceParticipant.getSeance().getDate();
-                Time seanceTime = seanceParticipant.getSeance().getTime();
-                Time seanceDuration = seanceParticipant.getSeance().getDuration();
-                LocalDateTime seanceDateTime = LocalDateTime.of(seanceDate, seanceTime.toLocalTime());
-                LocalDateTime endDateTime = seanceDateTime.plusHours(seanceDuration.getHours()).plusMinutes(seanceDuration.getMinutes());
-                if (LocalDateTime.now().isAfter(endDateTime)) {
-                    isPresent = true;
-                }
-            } else {
-                isPresent = true;
-            }
+            isValidate = presence.isValidate();
+            isPresent = seanceParticipant.isPresence();
         }
-        seanceParticipant.setPresence(isPresent);
-        seanceParticipantsDao.save(seanceParticipant);
-        return new PresenceRecord(isPresent, entryTime);
+        return new PresenceRecord(isPresent, isValidate, entryTime);
     }
-
 
     @Override
     public ResponseEntity<String> validatePresence(Map<String, String> requestMap) {
         try {
             if(jwtFilter.isProfessor()){
-                //
+
+                if(requestMap.containsKey("seance_id") && requestMap.containsKey("student_id") && requestMap.containsKey("is_presence")){
+                    Optional<Seance> optionalSeance = seanceDao.findById(Integer.parseInt(requestMap.get("seance_id")));
+                    if(optionalSeance.isPresent()){
+                        Seance seance = optionalSeance.get();
+
+                        User professor = seanceParticipantsDao.findBySeanceIdAndUserRole(seance.getId(),User.UserRole.PROFESSOR);
+                        if (professor != null && !professor.getEmail().equals(jwtFilter.getCurrentUser())) {
+                            return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS,HttpStatus.UNAUTHORIZED);
+                        }
+
+
+                        LocalDate seanceDate = seance.getDate();
+                        Time seanceTime = seance.getTime();
+                        Time seanceDuration = seance.getDuration();
+                        LocalDateTime seanceDebutDateTime = LocalDateTime.of(seanceDate, seanceTime.toLocalTime());
+                        LocalDateTime seanceEndDateTime = seanceDebutDateTime.plusHours(seanceDuration.getHours()).plusMinutes(seanceDuration.getMinutes());
+
+                        if(LocalDateTime.now().isBefore(seanceDebutDateTime) || LocalDateTime.now().isAfter(seanceEndDateTime)){
+                            return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS,HttpStatus.PRECONDITION_FAILED);
+                        }
+
+                        Optional<User> optionalStudent = userDao.findById(Integer.parseInt(requestMap.get("student_id")));
+                        if(optionalStudent.isPresent()){
+
+                            List<SeanceParticipants> seanceParticipantsList = seanceParticipantsDao.findBySeanceId(seance.getId());
+
+                            boolean isParticipant = false;
+                            for (SeanceParticipants seanceParticipant : seanceParticipantsList) {
+                                if (seanceParticipant.getUser().getId().equals(optionalStudent.get().getId())) {
+                                    isParticipant = true;
+                                    break;
+                                }
+                            }
+
+                            if (isParticipant) {
+                                for (SeanceParticipants seanceParticipant : seanceParticipantsList) {
+                                    if (seanceParticipant.getUser().getId().equals(optionalStudent.get().getId())) {
+                                        Presence presence = presenceDao.findByUserAndSeance(seanceParticipant.getUser(), seanceParticipant.getSeance());
+                                        seanceParticipant.setPresence(Boolean.valueOf(requestMap.get("is_presence")));
+                                        presence.setValidate(true);
+                                        seanceParticipantsDao.save(seanceParticipant);
+                                        presenceDao.save(presence);
+                                        break;
+                                    }
+                                }
+                                return SystemUtils.getResponseEntity("Presence Validated Successfully", HttpStatus.OK);
+
+                            } else {
+                                return SystemUtils.getResponseEntity("Participant id does not exist", HttpStatus.OK);
+                            }
+                        }
+                        return SystemUtils.getResponseEntity("Student id does not exist", HttpStatus.OK);
+                    }
+                    return SystemUtils.getResponseEntity("Seance id does not exist", HttpStatus.OK);
+                }
+
             }else{
                 return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS,HttpStatus.UNAUTHORIZED);
             }

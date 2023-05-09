@@ -22,6 +22,6 @@ public interface SeanceCtrl {
     @GetMapping(path = "/getParticipants")
     public ResponseEntity<List<SeanceParticipantWrapper>>  getParticipants(@RequestBody(required = true) Map<String,String> requestMap);
 
-    @GetMapping(path = "/validatePresence")
+    @PostMapping(path = "/validatePresence")
     public ResponseEntity<String> validatePresence(@RequestBody(required = true) Map<String,String> requestMap);
 }
