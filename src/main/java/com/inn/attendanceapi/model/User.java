@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.model;
 
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -27,12 +28,7 @@ import java.util.Set;
 @DynamicInsert
 @Table(name = "\"user\"")
 public class User implements Serializable {
-
     private static final long serialVersionUID = 1L;
-
-    public enum UserRole {
-        STUDENT, PROFESSOR, ADMIN
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,7 +58,7 @@ public class User implements Serializable {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private User.UserRole role;
+    private UserFactory.UserRole role;
 
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     private Set<YearBranchStudents> yearBranchStudents = new HashSet<>();

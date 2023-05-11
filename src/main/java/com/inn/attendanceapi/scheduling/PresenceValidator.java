@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
-public class presenceValidator {
+public class PresenceValidator {
 
     @Autowired
     private SeanceParticipantsDao seanceParticipantsDao;
@@ -25,23 +25,23 @@ public class presenceValidator {
     private PresenceDao presenceDao;
 
     @Transactional
-    @Scheduled(fixedDelay = 1)
+    //@Scheduled(fixedDelay = 1)
+    @Scheduled(cron = "0 0 11,13,16,18 * * MON-SAT")
     public void checkUnvalidatedPresences() {
         if (presenceDao.existsByValidate(false)) {
             List<Seance> unvalidatedSeances = presenceDao.findUnvalidatedSeances();
             for (Seance seance : unvalidatedSeances) {
                 List<SeanceParticipants> participants = seanceParticipantsDao.findBySeanceId(seance.getId());
                 for (SeanceParticipants participant : participants) {
-                    validatePresence(participant);
+                    autoValidatePresence(participant);
                 }
             }
         }
     }
 
-    public void validatePresence(SeanceParticipants seanceParticipant) {
+    public void autoValidatePresence(SeanceParticipants seanceParticipant) {
         Presence presence = presenceDao.findByUserAndSeance(seanceParticipant.getUser(), seanceParticipant.getSeance());
-        if (presence != null && !presence.isValidate()) {
-            if (!seanceParticipant.isPresence()) {
+        if (presence != null && !presence.isValidate() && !seanceParticipant.isPresence()) {
                 LocalDate seanceDate = seanceParticipant.getSeance().getDate();
                 Time seanceTime = seanceParticipant.getSeance().getTime();
                 Time seanceDuration = seanceParticipant.getSeance().getDuration();
@@ -53,7 +53,6 @@ public class presenceValidator {
                     presenceDao.save(presence);
                     seanceParticipantsDao.save(seanceParticipant);
                 }
-            }
         }
     }
 }

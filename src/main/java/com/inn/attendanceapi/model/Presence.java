@@ -1,6 +1,7 @@
 package com.inn.attendanceapi.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.inn.attendanceapi.model.id.PresenceId;
 import lombok.Data;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
@@ -14,6 +15,7 @@ import java.sql.Time;
 @DynamicUpdate
 @DynamicInsert
 @Table(name = "presence")
+@IdClass(PresenceId.class)
 @NamedQueries({
         @NamedQuery(
                 name = "Presence.findByUserAndSeance",
@@ -37,21 +39,18 @@ public class Presence implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Integer id;
-
-    @Column(name = "entry_time", columnDefinition = "TIME DEFAULT '00:00:00'")
-    @JsonFormat(pattern = "HH:mm:ss")
-    private Time Entrytime;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "seance_fk", nullable = false)
     private Seance seance;
 
+    @Id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_fk", nullable = false)
     private User user;
+
+    @Column(name = "entry_time", columnDefinition = "TIME DEFAULT '00:00:00'")
+    @JsonFormat(pattern = "HH:mm:ss")
+    private Time Entrytime;
 
     @Column(name = "is_validate", columnDefinition = "boolean default false")
     private boolean isValidate;

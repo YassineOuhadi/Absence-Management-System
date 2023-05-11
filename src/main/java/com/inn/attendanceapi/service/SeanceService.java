@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.service;
 
+import com.inn.attendanceapi.model.Justification;
 import com.inn.attendanceapi.wrapper.SeanceParticipantWrapper;
 import com.inn.attendanceapi.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;
@@ -14,4 +15,10 @@ public interface SeanceService {
     ResponseEntity<List<SeanceParticipantWrapper>> getParticipants(Map<String, String> requestMap);
 
     ResponseEntity<String> validatePresence(Map<String, String> requestMap);
+
+    ResponseEntity<String> justifyAbsence(Map<String, String> requestMap);
+
+    ResponseEntity<String> validateJustification(Map<String, String> requestMap);
+
+    ResponseEntity<Justification> getJustification(Map<String, String> requestMap);
 }

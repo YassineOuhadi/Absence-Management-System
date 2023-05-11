@@ -1,5 +1,7 @@
 package com.inn.attendanceapi.serviceImpl;
 
+import com.inn.attendanceapi.FactoryPattern.StudentFactory;
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.constants.SystemCst;
 import com.inn.attendanceapi.dao.ModuleDao;
 import com.inn.attendanceapi.dao.SemesterBranchModulesDao;
@@ -50,7 +52,7 @@ public class BranchServiceImpl implements BranchService {
                     Optional<User> optional = userDao.findById(Integer.parseInt(requestMap.get("student_id")));
                     if(optional.isPresent()){
                         User user = optional.get();
-                        if(user.getRole() == User.UserRole.STUDENT){
+                        if(user.getRole() == UserFactory.UserRole.STUDENT){
                             yearBranchStudentsDao.save(getYearBranchStudentFromMap(requestMap));
                             return SystemUtils.getResponseEntity("Year Branch Student Added Successfully", HttpStatus.OK);
                         }
@@ -69,14 +71,15 @@ public class BranchServiceImpl implements BranchService {
     private YearBranchStudents getYearBranchStudentFromMap(Map<String, String> requestMap){
         Year year = new Year();
         Branch branch = new Branch();
-        User user = new User();
+        UserFactory studentFactory = new StudentFactory();
+        User student = studentFactory.createUser();
         year.setId(Integer.parseInt(requestMap.get("year_id")));
         branch.setId(Integer.parseInt(requestMap.get("branch_id")));
-        user.setId(Integer.parseInt(requestMap.get("student_id")));
+        student.setId(Integer.parseInt(requestMap.get("student_id")));
         YearBranchStudents yearBranchStudents = new YearBranchStudents();
         yearBranchStudents.setYear(year);
         yearBranchStudents.setBranch(branch);
-        yearBranchStudents.setStudent(user);
+        yearBranchStudents.setStudent(student);
         yearBranchStudents.setLevel(YearBranchStudents.Level.valueOf(requestMap.get("level")));
         return yearBranchStudents;
     }
