@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.serviceImpl;
 
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.constants.SystemCst;
 import com.inn.attendanceapi.dao.*;
 import com.inn.attendanceapi.jwt.JwtFilter;
@@ -14,7 +15,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.sql.rowset.serial.SerialBlob;
+import java.io.File;
+import java.nio.file.Files;
+import java.sql.Blob;
 import java.sql.Time;
 import java.time.Duration;
 import java.time.LocalDate;
@@ -46,6 +52,9 @@ public class SeanceServiceImpl implements SeanceService {
 
     @Autowired
     SalleDao salleDao;
+
+    @Autowired
+    JustificationDao justificationDao;
 
     @Autowired
     JwtFilter jwtFilter;
@@ -134,15 +143,15 @@ public class SeanceServiceImpl implements SeanceService {
                     Optional<User> optional = userDao.findById(Integer.parseInt(requestMap.get("participant_id")));
                     if(optional.isPresent()){
                         User user = optional.get();
-                        if(user.getRole() == User.UserRole.STUDENT){
+                        if(user.getRole() == UserFactory.UserRole.STUDENT){
                             seanceParticipantsDao.save(getSeanceParticipantFromMap(requestMap));
                             return SystemUtils.getResponseEntity("Student Participation Added Successfully", HttpStatus.OK);
                         }
-                        else if (user.getRole() == User.UserRole.PROFESSOR){
+                        else if (user.getRole() == UserFactory.UserRole.PROFESSOR){
                             Integer seanceId = Integer.parseInt(requestMap.get("seance_id"));
                             List<SeanceParticipants> seanceParticipants = seanceParticipantsDao.findBySeanceId(seanceId);
                             for (SeanceParticipants sp : seanceParticipants) {
-                                if ((sp.getUser().getRole() == User.UserRole.PROFESSOR) && !(sp.getUser().equals(user))) {
+                                if ((sp.getUser().getRole() == UserFactory.UserRole.PROFESSOR) && !(sp.getUser().equals(user))) {
                                     return SystemUtils.getResponseEntity("A professor is already registered for this seance", HttpStatus.OK);
                                 }
                             }
@@ -162,7 +171,7 @@ public class SeanceServiceImpl implements SeanceService {
                         Group group = optionalGroup.get();
                         List<User> students = userDao.findByGroupId(groupId);
                         for (User student : students) {
-                            if(student.getRole() == User.UserRole.STUDENT){
+                            if(student.getRole() == UserFactory.UserRole.STUDENT){
                                 SeanceParticipants seanceParticipant = new SeanceParticipants();
                                 seanceParticipant.setSeance(seanceDao.getOne(seanceId));
                                 seanceParticipant.setUser(student);
@@ -207,7 +216,7 @@ public class SeanceServiceImpl implements SeanceService {
                     Integer seanceId = Integer.parseInt(requestMap.get("seance_id"));
 
                     if (jwtFilter.isProfessor()) {
-                        User professor = seanceParticipantsDao.findBySeanceIdAndUserRole(seanceId,User.UserRole.PROFESSOR);
+                        User professor = seanceParticipantsDao.findBySeanceIdAndUserRole(seanceId, UserFactory.UserRole.PROFESSOR);
                         if (professor != null && !professor.getEmail().equals(jwtFilter.getCurrentUser())) {
                             return new ResponseEntity<>(new ArrayList<>(), HttpStatus.UNAUTHORIZED);
                         }
@@ -250,6 +259,7 @@ public class SeanceServiceImpl implements SeanceService {
                         PresenceRecord presenceRecord = checkPresence(seanceParticipant);
                         boolean isPresent = presenceRecord.isPresent();
                         boolean isValidate = presenceRecord.isValidate();
+                        boolean isJustified = presenceRecord.isJustified();
                         Time entryTime = presenceRecord.entryTime();
 
                         if (requestMap.containsKey("status")) {
@@ -261,7 +271,7 @@ public class SeanceServiceImpl implements SeanceService {
                             }
                         }
 
-                        SeanceParticipantWrapper participant = new SeanceParticipantWrapper(new UserWrapper(user), isPresent, isValidate, entryTime);
+                        SeanceParticipantWrapper participant = new SeanceParticipantWrapper(new UserWrapper(user), isPresent, isValidate, isJustified, entryTime);
                         participants.add(participant);
                     }
 
@@ -280,13 +290,37 @@ public class SeanceServiceImpl implements SeanceService {
         Presence presence = presenceDao.findByUserAndSeance(seanceParticipant.getUser(), seanceParticipant.getSeance());
         boolean isPresent = false;
         boolean isValidate = false;
+        boolean isJustified = false;
         Time entryTime = null;
+
         if (presence != null) {
-            entryTime = presence.getEntrytime();
+            if (!seanceParticipant.isPresence() && !presence.isValidate()) {
+                LocalDate seanceDate = seanceParticipant.getSeance().getDate();
+                Time seanceTime = seanceParticipant.getSeance().getTime();
+                Time seanceDuration = seanceParticipant.getSeance().getDuration();
+                LocalDateTime seanceDateTime = LocalDateTime.of(seanceDate, seanceTime.toLocalTime());
+                LocalDateTime endDateTime = seanceDateTime.plusHours(seanceDuration.getHours()).plusMinutes(seanceDuration.getMinutes());
+                if (LocalDateTime.now().isAfter(endDateTime)) {
+                    seanceParticipant.setPresence(true);
+                    presence.setValidate(true);
+                    presenceDao.save(presence);
+                    seanceParticipantsDao.save(seanceParticipant);
+                }
+            }
+            else if(seanceParticipant.isPresence() && presence.isValidate()) entryTime = presence.getEntrytime();
             isValidate = presence.isValidate();
             isPresent = seanceParticipant.isPresence();
         }
-        return new PresenceRecord(isPresent, isValidate, entryTime);
+
+        if(!isPresent){
+            Optional<Justification> optionalJustification = justificationDao.findByParticipantAndSeance(seanceParticipant.getUser(),seanceParticipant.getSeance());
+            if(optionalJustification.isPresent()){
+                Justification justification =optionalJustification.get();
+                isJustified = justification.isAccepted();
+            }
+        }
+
+        return new PresenceRecord(isPresent, isValidate, isJustified, entryTime);
     }
 
     @Override
@@ -299,7 +333,7 @@ public class SeanceServiceImpl implements SeanceService {
                     if(optionalSeance.isPresent()){
                         Seance seance = optionalSeance.get();
 
-                        User professor = seanceParticipantsDao.findBySeanceIdAndUserRole(seance.getId(),User.UserRole.PROFESSOR);
+                        User professor = seanceParticipantsDao.findBySeanceIdAndUserRole(seance.getId(), UserFactory.UserRole.PROFESSOR);
                         if (professor != null && !professor.getEmail().equals(jwtFilter.getCurrentUser())) {
                             return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS,HttpStatus.UNAUTHORIZED);
                         }
@@ -357,6 +391,132 @@ public class SeanceServiceImpl implements SeanceService {
             e.printStackTrace();
         }
         return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> justifyAbsence(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isStudent() || jwtFilter.isProfessor()) {
+                if (requestMap.containsKey("seance_id") && (requestMap.containsKey("content") || requestMap.containsKey("support"))) {
+                    Optional<Seance> optionalSeance = seanceDao.findById(Integer.parseInt(requestMap.get("seance_id")));
+                    if (optionalSeance.isPresent()) {
+                        Seance seance = optionalSeance.get();
+                        User participant = userDao.findByEmailId(jwtFilter.getCurrentUser());
+
+                        Optional<SeanceParticipants> participantOptional = seanceParticipantsDao.findBySeanceAndParticipant(seance,participant);
+                        if(participantOptional.isPresent()){
+                            SeanceParticipants seanceParticipant = participantOptional.get();
+                            if(!seanceParticipant.isPresence()){
+
+                                Optional<Justification> justificationOptional = justificationDao.findByParticipantAndSeance(participant, seance);
+
+                                Justification justification;
+
+                                if (justificationOptional.isPresent()) {
+                                    justification = justificationOptional.get();
+                                    if (requestMap.containsKey("content")) {
+                                        justification.setContent(requestMap.get("content"));
+                                    }
+                                    if (requestMap.containsKey("support")) {
+                                        String base64Content = requestMap.get("support");
+                                        if (base64Content != null) {
+                                            byte[] binaryContent = Base64.getDecoder().decode(base64Content);
+                                            Blob supportBlob = new SerialBlob(binaryContent);
+                                            justification.setSupport(supportBlob);
+                                        } else {
+                                            justification.setSupport(null);
+                                        }
+                                    }
+                                } else {
+                                    justification = new Justification();
+                                    justification.setSeance(seance);
+                                    justification.setUser(participant);
+                                    justification.setContent(requestMap.get("content"));
+                                    if (requestMap.containsKey("support")) {
+                                        byte[] supportBytes = Base64.getDecoder().decode(requestMap.get("support"));
+                                        Blob supportBlob = new SerialBlob(supportBytes);
+                                        justification.setSupport(supportBlob);
+                                    }
+                                }
+                                justificationDao.save(justification);
+                                return SystemUtils.getResponseEntity("Absence Justified Successfully", HttpStatus.OK);
+
+                            }
+                            return SystemUtils.getResponseEntity("Absence not found", HttpStatus.OK);
+                        }
+                        return SystemUtils.getResponseEntity("Participation not found", HttpStatus.OK);
+                    }
+                    return SystemUtils.getResponseEntity("Seance does not exist", HttpStatus.OK);
+                }
+            } else {
+                return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+
+    @Override
+    public ResponseEntity<String> validateJustification(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                if (requestMap.containsKey("seance_id") && requestMap.containsKey("participant_id") && requestMap.containsKey("is_accepted")) {
+                    Optional<Seance> optionalSeance = seanceDao.findById(Integer.parseInt(requestMap.get("seance_id")));
+                    if (optionalSeance.isPresent()) {
+                        Seance seance = optionalSeance.get();
+                        Optional<User> optionalUser = userDao.findById(Integer.valueOf(requestMap.get("participant_id")));
+                        if(optionalUser.isPresent()){
+                            User participant = optionalUser.get();
+                            Optional<Justification> optionalJustification = justificationDao.findByParticipantAndSeance(participant,seance);
+                            if(optionalJustification.isPresent()){
+                                Justification justification = optionalJustification.get();
+                                boolean isAccepted = Boolean.parseBoolean(requestMap.get("is_accepted"));
+                                justification.setAccepted(isAccepted);
+                                justificationDao.save(justification);
+                                return SystemUtils.getResponseEntity("Justification Validated Successfully", HttpStatus.OK);
+                            }
+                            return SystemUtils.getResponseEntity("Justification does not exist", HttpStatus.OK);
+                        }
+                        return SystemUtils.getResponseEntity("Participant does not exist", HttpStatus.OK);
+                    }
+                    return SystemUtils.getResponseEntity("Seance does not exist", HttpStatus.OK);
+                }
+            } else {
+                return SystemUtils.getResponseEntity(SystemCst.UNAUTHORIZED_ACCESS, HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<Justification> getJustification(Map<String, String> requestMap) {
+        try {
+            if (jwtFilter.isAdmin()) {
+                if (requestMap.containsKey("seance_id") && requestMap.containsKey("participant_id")) {
+                    Optional<Seance> optionalSeance = seanceDao.findById(Integer.parseInt(requestMap.get("seance_id")));
+                    if (optionalSeance.isPresent()) {
+                        Seance seance = optionalSeance.get();
+                        Optional<User> optionalUser = userDao.findById(Integer.valueOf(requestMap.get("participant_id")));
+                        if(optionalUser.isPresent()){
+                            User participant = optionalUser.get();
+                            Optional<Justification> optionalJustification = justificationDao.findByParticipantAndSeance(participant,seance);
+                            if(optionalJustification.isPresent()){
+                                return new ResponseEntity<>(optionalJustification.get(),HttpStatus.OK);
+                            }
+                        }
+                    }
+                }
+            } else {
+                return new ResponseEntity<>(new Justification(),HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new Justification(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

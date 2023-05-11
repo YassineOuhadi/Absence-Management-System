@@ -1,5 +1,7 @@
 package com.inn.attendanceapi.serviceImpl;
 
+import com.inn.attendanceapi.FactoryPattern.ProfessorFactory;
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.constants.SystemCst;
 import com.inn.attendanceapi.dao.UserDao;
 import com.inn.attendanceapi.jwt.JwtFilter;
@@ -66,16 +68,17 @@ public class ProfessorServiceImpl implements ProfessorService {
     }
 
     private User getUserFromMap(Map<String,String> requestMap){
-        User user = new User();
-        user.setFirstName(requestMap.get("firstName"));
-        user.setLastName(requestMap.get("lastName"));
-        user.setRfid(requestMap.get("rfid"));
-        user.setContactNumber(requestMap.get("contactNumber"));
-        user.setEmail(requestMap.get("email"));
-        user.setPassword(requestMap.get("password"));
-        user.setStatus("DEACTIVATED");
-        user.setRole(User.UserRole.PROFESSOR);
-        return user;
+        UserFactory professorFactory = new ProfessorFactory();
+        User professor = professorFactory.createUser();
+        professor.setFirstName(requestMap.get("firstName"));
+        professor.setLastName(requestMap.get("lastName"));
+        professor.setRfid(requestMap.get("rfid"));
+        professor.setContactNumber(requestMap.get("contactNumber"));
+        professor.setEmail(requestMap.get("email"));
+        professor.setPassword(requestMap.get("password"));
+        professor.setStatus("DEACTIVATED");
+        professor.setRole(UserFactory.UserRole.PROFESSOR);
+        return professor;
     }
 
     @Override

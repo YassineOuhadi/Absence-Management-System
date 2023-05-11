@@ -2,6 +2,7 @@ package com.inn.attendanceapi.controllerImpl;
 
 import com.inn.attendanceapi.constants.SystemCst;
 import com.inn.attendanceapi.controller.SeanceCtrl;
+import com.inn.attendanceapi.model.Justification;
 import com.inn.attendanceapi.service.SeanceService;
 import com.inn.attendanceapi.utils.SystemUtils;
 import com.inn.attendanceapi.wrapper.SeanceParticipantWrapper;
@@ -59,5 +60,35 @@ public class SeanceCtrlImpl implements SeanceCtrl {
             e.printStackTrace();
         }
         return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> justifyAbsence(Map<String, String> requestMap) {
+        try {
+            return seanceService.justifyAbsence(requestMap);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<String> validateJustification(Map<String, String> requestMap) {
+        try {
+            return seanceService.validateJustification(requestMap);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return SystemUtils.getResponseEntity(SystemCst.SOMETHING_WENT_WRONG, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @Override
+    public ResponseEntity<Justification> getJustification(Map<String, String> requestMap) {
+        try {
+            return seanceService.getJustification(requestMap);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return new ResponseEntity<>(new Justification(),HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

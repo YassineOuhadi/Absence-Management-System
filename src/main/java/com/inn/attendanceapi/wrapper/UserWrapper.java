@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.wrapper;
 
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.model.User;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,9 +23,9 @@ public class UserWrapper {
 
     private String status;
 
-    private User.UserRole role;
+    private UserFactory.UserRole role;
 
-    public UserWrapper(Integer id, String firstName, String lastName, String rfid, String email, String contactNumber, String status, User.UserRole role) {
+    public UserWrapper(Integer id, String firstName, String lastName, String rfid, String email, String contactNumber, String status, UserFactory.UserRole role) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;

@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.jwt;
 
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.model.User;
 import io.jsonwebtoken.Claims;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,17 +63,17 @@ public class JwtFilter extends OncePerRequestFilter {
 
     public boolean isAdmin() {
         String roleClaim = (String) claims.get("role");
-        return roleClaim != null && User.UserRole.ADMIN.name().equalsIgnoreCase(roleClaim);
+        return roleClaim != null && UserFactory.UserRole.ADMIN.name().equalsIgnoreCase(roleClaim);
     }
 
     public boolean isProfessor() {
         String roleClaim = (String) claims.get("role");
-        return roleClaim != null && User.UserRole.PROFESSOR.name().equalsIgnoreCase(roleClaim);
+        return roleClaim != null && UserFactory.UserRole.PROFESSOR.name().equalsIgnoreCase(roleClaim);
     }
 
     public boolean isStudent() {
         String roleClaim = (String) claims.get("role");
-        return roleClaim != null && User.UserRole.STUDENT.name().equalsIgnoreCase(roleClaim);
+        return roleClaim != null && UserFactory.UserRole.STUDENT.name().equalsIgnoreCase(roleClaim);
     }
 
     public String getCurrentUser(){

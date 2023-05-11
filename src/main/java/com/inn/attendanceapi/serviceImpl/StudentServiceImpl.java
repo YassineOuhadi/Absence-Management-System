@@ -1,5 +1,7 @@
 package com.inn.attendanceapi.serviceImpl;
 
+import com.inn.attendanceapi.FactoryPattern.StudentFactory;
+import com.inn.attendanceapi.FactoryPattern.UserFactory;
 import com.inn.attendanceapi.constants.SystemCst;
 import com.inn.attendanceapi.dao.UserDao;
 import com.inn.attendanceapi.jwt.JwtFilter;
@@ -40,7 +42,7 @@ public class StudentServiceImpl implements StudentService {
                 if (validateSignupMap(requestMap)) {
                     User user = userDao.findByEmailId(requestMap.get("email")); //objet persistent, when i do save he modifier en base de donne, to rendre objet simple on va detacher
                     if (Objects.isNull(user)) {
-                        userDao.save(getUserFromMap(requestMap));
+                        userDao.save(getStudentFromMap(requestMap));
                         return SystemUtils.getResponseEntity("Successfully Registered", HttpStatus.OK);
                     } else {
                         return SystemUtils.getResponseEntity("Email already exits", HttpStatus.BAD_REQUEST);
@@ -65,17 +67,18 @@ public class StudentServiceImpl implements StudentService {
         return false;
     }
 
-    private User getUserFromMap(Map<String,String> requestMap){
-        User user = new User();
-        user.setFirstName(requestMap.get("firstName"));
-        user.setLastName(requestMap.get("lastName"));
-        user.setRfid(requestMap.get("rfid"));
-        user.setContactNumber(requestMap.get("contactNumber"));
-        user.setEmail(requestMap.get("email"));
-        user.setPassword(requestMap.get("password"));
-        user.setStatus("DEACTIVATED");
-        user.setRole(User.UserRole.STUDENT);
-        return user;
+    private User getStudentFromMap(Map<String,String> requestMap){
+        UserFactory studentFactory = new StudentFactory();
+        User student = studentFactory.createUser();
+        student.setFirstName(requestMap.get("firstName"));
+        student.setLastName(requestMap.get("lastName"));
+        student.setRfid(requestMap.get("rfid"));
+        student.setContactNumber(requestMap.get("contactNumber"));
+        student.setEmail(requestMap.get("email"));
+        student.setPassword(requestMap.get("password"));
+        student.setStatus("DEACTIVATED");
+        student.setRole(UserFactory.UserRole.STUDENT);
+        return student;
     }
 
     @Override

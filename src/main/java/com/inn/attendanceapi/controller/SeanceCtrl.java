@@ -1,5 +1,6 @@
 package com.inn.attendanceapi.controller;
 
+import com.inn.attendanceapi.model.Justification;
 import com.inn.attendanceapi.wrapper.SeanceParticipantWrapper;
 import com.inn.attendanceapi.wrapper.UserWrapper;
 import org.springframework.http.ResponseEntity;
@@ -24,4 +25,14 @@ public interface SeanceCtrl {
 
     @PostMapping(path = "/validatePresence")
     public ResponseEntity<String> validatePresence(@RequestBody(required = true) Map<String,String> requestMap);
+
+
+    @PostMapping(path = "/justifyAbsence")
+    public ResponseEntity<String> justifyAbsence(@RequestBody(required = true) Map<String,String> requestMap);
+
+    @GetMapping(path = "/getJustification")
+    public ResponseEntity<Justification> getJustification(@RequestBody(required = true) Map<String,String> requestMap);
+
+    @PostMapping(path = "/validateJustification")
+    public ResponseEntity<String> validateJustification(@RequestBody(required = true) Map<String,String> requestMap);
 }

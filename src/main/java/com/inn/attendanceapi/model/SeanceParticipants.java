@@ -22,6 +22,10 @@ import java.sql.Time;
                 query = "SELECT sp FROM SeanceParticipants sp WHERE sp.seance.id = :seance_id"
         ),
         @NamedQuery(
+                name = "SeanceParticipants.findBySeanceAndParticipant",
+                query = "SELECT sp FROM SeanceParticipants sp WHERE sp.seance = :seance AND sp.user = :participant"
+        ),
+        @NamedQuery(
                 name = "SeanceParticipants.findBySeanceIdAndUserRole",
                 query = "SELECT sp.user FROM SeanceParticipants sp WHERE sp.seance.id = :seance_id AND sp.user.role = :role"
         )
