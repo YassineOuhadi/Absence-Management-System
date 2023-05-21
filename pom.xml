@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.inn.attendanceapi</groupId>
-	<artifactId>com.inn.attendanceapi</artifactId>
+	<artifactId>app-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>Attendance API</name>
 	<description>JEE Project</description>
